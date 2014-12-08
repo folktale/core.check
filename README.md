@@ -14,7 +14,15 @@ Interface checking for JS values
 ## Example
 
 ```js
-( ... )
+// In Sweet.js
+$contract{ Any | Array<Any> -> Array<Any> } :: function(a) {
+  return Array.isArray(a)? a : [a]
+}
+
+// In JS
+c.contract([c.Union(c.Any, c.Array(c.Any))], c.Array(c.Any))(function(a) {
+  return Array.isArray(a)? a : [a]
+}
 ```
 
 
