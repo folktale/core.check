@@ -108,39 +108,9 @@ function toList(a) {
  *
  * @summary α, Array[Validation[Violation, α]] → Validation[Array[Violation], α]
  */
-function successBiasedCollect(a, xs) {
-  return xs.map(successBiasedValidation)
-           .reduce(binary(ap), successBiasedValidation(Success(curry(xs.length, λ[toList(arguments)]))))
-           .cata({ Failure: Failure, Success: Success })
-           .map(λ[a])
-}
-
-/**
- * Collects failures in a semigroup.
- *
- * @summary α, Array[Validation[Violation, α]] → Validation[Array[Violation], α]
- */
 function collect(a, xs) {
   return xs.reduce(binary(ap), Success(curry(xs.length, λ[toList(arguments)])))
            .map(λ[a])
-}
-
-/**
- * Applicative functor for validations with a Success bias.
- *
- * @summary Validation[Violation, α] → RValidation[Violation, α]
- */
-function successBiasedValidation(v) {
-  return versione(v, {
-    ap: function(that) {
-      return this.isSuccess && that.isSuccess?  that.map(this.value)
-      :      this.isSuccess?                    this
-      :      that.isSuccess?                    that
-      :      /* otherwise */                    successBiasedValidation(
-                                                  Failure(this.value +++ that.value)
-                                                )
-    }
-  })
 }
 
 /**
@@ -199,7 +169,11 @@ exports.Optional = function(checker) {
 exports.Or = function(checkers) {
   return function(a) {
     var check = unary(flip(apply)(a));
-    return successBiasedCollect(a, checkers.map(check ->> λ[#.failureMap(forceArray ->> Violation.Any)]))
+    var vals = checkers.map(check ->> λ[#.failureMap(forceArray ->> Violation.Any)]);
+    var hasSuccess = vals.filter(λ[#.isSuccess]).length !== 0;
+
+    return hasSuccess?      Success(a)
+    :      /* otherwise */  collect(a, vals)
   }
 }
 
@@ -226,7 +200,7 @@ exports.And = function(checkers) {
 exports.Seq = function(checkers) {
   return function(xs) {
     var vals = checkers.map(λ(f, i) -> f(xs[i]));
-    return collect(xs, vals.map(λ[#.failureMap(forceArray)]))
+    return collect(xs, vals.map(λ[#.failureMap(forceArray ->> Violation.All)]))
   }
 }
 
@@ -238,7 +212,7 @@ exports.Seq = function(checkers) {
 exports.ArrayOf = function(checker) {
   return function(xs) {
     var vals = xs.map(λ[checker(#)]);
-    return collect(xs, vals.map(λ[#.failureMap(forceArray)]))
+    return collect(xs, vals.map(λ[#.failureMap(forceArray ->> Violation.All)]))
   }
 }
 
@@ -250,6 +224,6 @@ exports.ArrayOf = function(checker) {
 exports.ObjectOf = function(iface) {
   return function(x) {
     var vals = pairs(iface).map(λ(p) -> p.value(x[p.key]));
-    return collect(x, vals.map(λ[#.failureMap(forceArray)]))
+    return collect(x, vals.map(λ[#.failureMap(forceArray ->> Violation.All)]))
   }
 }
