@@ -41,12 +41,19 @@ union Violation {
   Equality(*, *),
   Identity(*, *),
   Optional(Violation),
-  Any(Array)
+  Any(Array),
+  All(Array)
 } deriving (Base, Cata)
 
 Any::concat = function(b) {
   return match (this, b) {
-    (Any(xs), Any(ys)) => Violation.Any(xs +++ ys),
+    (Any(xs), Any(ys)) => Violation.Any(xs +++ ys)
+  }
+}
+
+All::concat = function(b) {
+  return match (this, b) {
+    (All(xs), All(ys)) => Violation.All(xs +++ ys)
   }
 }
 
@@ -88,14 +95,34 @@ function forceArray(a) {
 }
 
 /**
+ * Converts things to a list.
+ *
+ * @summary ArrayLike[α] → Array[α]
+ */
+function toList(a) {
+  return Array::slice.call(a)
+}
+
+/**
  * Collects failures in a semigroup.
  *
- * @summary Array[Validation[Violation, α]] → Validation[Array[Violation], α]
+ * @summary α, Array[Validation[Violation, α]] → Validation[Array[Violation], α]
  */
-function collect(xs) {
+function successBiasedCollect(a, xs) {
   return xs.map(successBiasedValidation)
-           .reduce(binary(ap), successBiasedValidation(Success(curry(xs.length, λ[a]))))
+           .reduce(binary(ap), successBiasedValidation(Success(curry(xs.length, λ[toList(arguments)]))))
            .cata({ Failure: Failure, Success: Success })
+           .map(λ[a])
+}
+
+/**
+ * Collects failures in a semigroup.
+ *
+ * @summary α, Array[Validation[Violation, α]] → Validation[Array[Violation], α]
+ */
+function collect(a, xs) {
+  return xs.reduce(binary(ap), Success(curry(xs.length, λ[toList(arguments)])))
+           .map(λ[a])
 }
 
 /**
@@ -114,6 +141,15 @@ function successBiasedValidation(v) {
                                                 )
     }
   })
+}
+
+/**
+ * Returns a list of pairs of key/value for an object.
+ *
+ * @summary { String → * } → [{ key: String, value: * }]
+ */
+function pairs(x) {
+  return Object.keys(x).map(λ(k) -> ({ key: k, value: x[k] }))
 }
 
 // -- Primitive tag checkers -------------------------------------------
@@ -160,9 +196,60 @@ exports.Optional = function(checker) {
  *
  * @summary Array[α → Validation[Violation, α]] → α → Validation[Violation, α]
  */
-exports.Union = function(checkers) {
+exports.Or = function(checkers) {
   return function(a) {
     var check = unary(flip(apply)(a));
-    return collect(checkers.map(check ->> λ[#.failureMap(forceArray ->> Violation.Any)]))
+    return successBiasedCollect(a, checkers.map(check ->> λ[#.failureMap(forceArray ->> Violation.Any)]))
+  }
+}
+
+/**
+ * Succeeds if all values succeed.
+ *
+ * @summary Array[α → Validation[Violation, α]] → α → Validation[Violation, α]
+ */
+exports.And = function(checkers) {
+  return function(a) {
+    var check = unary(flip(apply)(a));
+    return collect(a, checkers.map(check ->> λ[#.failureMap(forceArray ->> Violation.All)]))
+  }
+}
+
+/**
+ * Accepts a sequence of things.
+ *
+ * @summary
+ * : Array[α₁ → Validation[Violation, α₁], α₂ → Validation[Violation, α₂], ..., αₙ → Validation[Violation, αₙ]]
+ * → Array[α₁, α₂, ..., αₙ]
+ * → Validation[Violation, Array[α₁, α₂, ..., αₙ]]
+ */
+exports.Seq = function(checkers) {
+  return function(xs) {
+    var vals = checkers.map(λ(f, i) -> f(xs[i]));
+    return collect(xs, vals.map(λ[#.failureMap(forceArray)]))
+  }
+}
+
+/**
+ * Accepts an array of things.
+ *
+ * @summary (α → Validation[Violation, α]) → α → Validation[Violation, α]
+ */
+exports.ArrayOf = function(checker) {
+  return function(xs) {
+    var vals = xs.map(λ[checker(#)]);
+    return collect(xs, vals.map(λ[#.failureMap(forceArray)]))
+  }
+}
+
+/**
+ * Accepts an interface of things.
+ *
+ * @summary { String → Validation[Violation, *] } → { String → * } → Validation[Violation, { String → * }]
+ */
+exports.ObjectOf = function(iface) {
+  return function(x) {
+    var vals = pairs(iface).map(λ(p) -> p.value(x[p.key]));
+    return collect(x, vals.map(λ[#.failureMap(forceArray)]))
   }
 }
