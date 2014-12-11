@@ -2,7 +2,7 @@ core.check
 ==========
 
 [![Build status](https://img.shields.io/travis/folktale/core.check/master.svg?style=flat)](https://travis-ci.org/folktale/core.check)
-[![NPM version](https://img.shields.io/npm/v/npm.svg?style=flat)](https://npmjs.org/package/core.check)
+[![NPM version](https://img.shields.io/npm/v/core.check.svg?style=flat)](https://npmjs.org/package/core.check)
 [![Dependencies status](https://img.shields.io/david/folktale/core.check.svg?style=flat)](https://david-dm.org/folktale/core.check)
 ![Licence](https://img.shields.io/npm/l/core.check.svg?style=flat&label=licence)
 ![Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat)
