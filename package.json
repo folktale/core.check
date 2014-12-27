@@ -1,6 +1,6 @@
 {
   "name": "core.check",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Interface checking for JS values",
   "main": "lib/index.js",
   "scripts": {

@@ -37,7 +37,7 @@ var deepEqual = require('deep-equal');
 
 // -- ADTs -------------------------------------------------------------
 union Violation {
-  Tag(String),
+  Tag(String, *),
   Equality(*, *),
   Identity(*, *),
   Optional(Violation),
@@ -81,7 +81,7 @@ var classOf = function(a) {
 function makeTagChecker(tag) {
   return function(a) {
     return classOf(a) === tag?  Success(a)
-    :      /* otherwise */      Failure(Violation.Tag(tag))
+    :      /* otherwise */      Failure(Violation.Tag(tag, a))
   }
 }
 
