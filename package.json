@@ -1,6 +1,6 @@
 {
   "name": "core.check",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Interface checking for JS values",
   "main": "lib/index.js",
   "scripts": {
@@ -15,7 +15,6 @@
     "interfaces",
     "checking",
     "tag checking",
-    "fantasy-land",
     "folktale"
   ],
   "author": "Quildreen Motta",
