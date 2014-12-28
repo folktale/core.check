@@ -29,10 +29,12 @@
 var { Success, Failure } = require('data.validation');
 var { apply, flip, curry } = require('core.lambda');
 var { unary, binary } = require('core.arity');
-var { Base, Cata } = require('adt-simple');
+var { Base, Eq, Extractor, Reflect, Cata } = require('adt-simple');
 var { map, ap } = require('control.monads');
+var show = require('core.inspect');
 var versione = require('versione');
 var deepEqual = require('deep-equal');
+
 
 
 // -- ADTs -------------------------------------------------------------
@@ -42,7 +44,7 @@ union Violation {
   Identity(*, *),
   Any(Array),
   All(Array)
-} deriving (Base, Cata)
+} deriving (Eq, Extractor, Reflect, Cata)
 
 Any::concat = function(b) {
   return match (this, b) {
@@ -53,6 +55,16 @@ Any::concat = function(b) {
 All::concat = function(b) {
   return match (this, b) {
     (All(xs), All(ys)) => Violation.All(xs +++ ys)
+  }
+}
+
+Violation::toString = function() {
+  return match this {
+    Tag(t, v)      => show(v) + ' to have tag ' + t,
+    Equality(a, b) => show(a) + ' to structurally equal ' + show(b),
+    Identity(a, b) => show(a) + ' to be ' + show(b),
+    Any(xs)        => xs.map(λ[#.toString()]).join(', or '),
+    All(xs)        => xs.map(λ[#.toString()]).join(', and ')
   }
 }
 

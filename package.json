@@ -29,7 +29,8 @@
     "core.lambda": "~1.0.0",
     "core.arity": "~1.0.0",
     "control.monads": "~0.6.0",
-    "versione": "~0.1.0"
+    "versione": "~0.1.0",
+    "core.inspect": "~1.0.1"
   },
   "devDependencies": {
     "browserify": "^6.1.0",
