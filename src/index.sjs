@@ -237,7 +237,7 @@ exports.ObjectOf = function(iface) {
  */
 exports.assert = function(val) {
   return val.cata({
-    Failure: λ[throw new Error('Expected ' + show(#))],
+    Failure: λ(a) -> { throw new Error('Expected ' + show(a)) },
     Success: λ[#]
   })
 }
