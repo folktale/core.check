@@ -227,3 +227,17 @@ exports.ObjectOf = function(iface) {
     return collect(x, vals.map(λ[#.failureMap(forceArray ->> Violation.All)]))
   }
 }
+
+
+// -- Assertions -------------------------------------------------------
+/**
+ * Validates the result of a check.
+ *
+ * @summary Validation[Violation, α] → α :: throws
+ */
+exports.assert = function(val) {
+  return val.cata({
+    Failure: λ[throw new Error('Expected ' + show(#))],
+    Success: λ[#]
+  })
+}
