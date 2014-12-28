@@ -40,7 +40,6 @@ union Violation {
   Tag(String, *),
   Equality(*, *),
   Identity(*, *),
-  Optional(Violation),
   Any(Array),
   All(Array)
 } deriving (Base, Cata)
@@ -149,17 +148,6 @@ exports.Identity = function(a) {
 }
 
 // -- Higher-order checkers --------------------------------------------
-
-/**
- * Makes a contract optional.
- *
- * @summary (α → Validation[Violation, α]) → α → Validation[Violation, α]
- */
-exports.Optional = function(checker) {
-  return function(a) {
-    return checker(a).failureMap(λ(a) -> Violation.Optional(a));
-  }
-}
  
 /**
  * Accepts one of the given types.
