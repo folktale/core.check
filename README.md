@@ -113,5 +113,5 @@ Released under the [MIT licence](https://github.com/folktale/core.check/blob/mas
 [es5-shim]: https://github.com/kriskowal/es5-shim
 [docs]: http://folktale.github.io/core.check
 <!-- [release: https://github.com/folktale/core.check/releases/download/v$VERSION/core.check-$VERSION.tar.gz] -->
-[release]: https://github.com/folktale/core.check/releases/download/v0.0.0/core.check-0.0.0.tar.gz
+[release]: https://github.com/folktale/core.check/releases/download/v0.1.1/core.check-0.1.1.tar.gz
 <!-- [/release] -->
