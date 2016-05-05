@@ -111,7 +111,7 @@ Released under the [MIT licence](https://github.com/folktale/core.check/blob/mas
 [Make]: http://www.gnu.org/software/make/
 [Node.js]: http://nodejs.org/
 [es5-shim]: https://github.com/kriskowal/es5-shim
-[docs]: http://folktale.github.io/core.check
+[docs]: http://docs.folktalejs.org/en/latest/api/core/check/
 <!-- [release: https://github.com/folktale/core.check/releases/download/v$VERSION/core.check-$VERSION.tar.gz] -->
 [release]: https://github.com/folktale/core.check/releases/download/v0.1.1/core.check-0.1.1.tar.gz
 <!-- [/release] -->
